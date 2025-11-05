@@ -28,7 +28,7 @@
 
 <script>
 import { useQuasar } from "quasar";
-import { decode, encode } from "src/appUtils";
+import { encode } from "src/appUtils";
 import { useMainStore } from "stores/main-store";
 
 export default {
@@ -41,39 +41,35 @@ export default {
     };
   },
   methods: {
-    openObject() {
-      this.$emit("openObject", this.prop.row);
-    },
-    deleteObject() {
-      this.$emit("deleteObject", this.prop.row);
-    },
-    renameObject() {
-      this.$emit("renameObject", this.prop.row);
-    },
-    updateMetadataObject() {
-      this.$emit("updateMetadataObject", this.prop.row);
-    },
+    openObject() { this.$emit("openObject", this.prop.row); },
+    deleteObject() { this.$emit("deleteObject", this.prop.row); },
+    renameObject() { this.$emit("renameObject", this.prop.row); },
+    updateMetadataObject() { this.$emit("updateMetadataObject", this.prop.row); },
+
     shareObject: async function () {
       try {
-        // Public R2 domain
         const baseUrl = "https://file.fosbat.art";
 
-        let path = this.prop.row.key;
+        // Split the R2 object key into segments
+        const segments = this.prop.row.key.split("/");
 
-        // Decode Base64 if needed
-        try {
-          const decoded = atob(path);
-          if (/^[\w\s\-./]+$/.test(decoded)) {
-            path = decoded;
+        // Decode each segment individually if it's Base64
+        const decodedSegments = segments.map(seg => {
+          try {
+            const decoded = atob(seg);
+            // Only return if it looks like a valid filename
+            if (/^[\w\s\-./]+$/.test(decoded)) {
+              return decoded;
+            }
+            return seg;
+          } catch {
+            return seg; // not Base64
           }
-        } catch {
-          // Not Base64, leave as-is
-        }
+        });
 
-        // Normalize folder paths
-        path = path.replace(/\\/g, "/").replace(/^\/+/, "");
+        // Join segments to form a proper path
+        const path = decodedSegments.join("/");
 
-        // Construct sharable URL
         const url = `${baseUrl}/${path}`;
 
         await navigator.clipboard.writeText(url);
@@ -90,6 +86,7 @@ export default {
         });
       }
     },
+
     downloadObject() {
       const link = document.createElement("a");
       link.download = this.prop.row.name;
@@ -101,4 +98,5 @@ export default {
   }
 };
 </script>
+
 
