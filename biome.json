@@ -5,15 +5,22 @@
     "clientKind": "git",
     "useIgnoreFile": false
   },
-  "include": [
-    "packages/**/*.{js,ts,vue}",
-    "template/**/*.{js,ts,vue}",
-    "packages/dashboard/src/**/*.{js,ts,vue}",
-    "packages/worker/src/**/*.{js,ts,vue}"
-  ],
+  "files": {
+    "ignoreUnknown": false,
+    "ignore": [],
+    "include": [
+      "packages/**/*.{js,ts,vue}",
+      "template/**/*.{js,ts,vue}",
+      "packages/dashboard/src/**/*.{js,ts,vue}",
+      "packages/worker/src/**/*.{js,ts,vue}"
+    ]
+  },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "trailingCommas": "none"
   },
   "organizeImports": {
     "enabled": true
@@ -42,17 +49,26 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "single"
-    }
-  },
-  "json": {
-    "formatter": {
-      "quoteStyle": "double"
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 120,
+      "trailingCommas": "none"
     }
   },
   "css": {
     "formatter": {
-      "indentStyle": "space"
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 120,
+      "trailingCommas": "none"
+    }
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 120,
+      "trailingCommas": "none"
     }
   }
 }
