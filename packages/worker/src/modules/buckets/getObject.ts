@@ -13,11 +13,24 @@ export class GetObject extends OpenAPIRoute {
 				bucket: z.string(),
 				key: z.string().describe("base64 encoded file key"),
 			}),
+			query: z.object({
+				public: z.boolean().optional(), // optional query to return JSON with public URL
+			}),
 		},
 		responses: {
 			"200": {
-				description: "File binary",
-				schema: z.string().openapi({ format: "binary" }),
+				description: "File binary or JSON with public URL",
+				schema: z.union([
+					z.string().openapi({ format: "binary" }),
+					z.object({
+						bucket: z.string(),
+						key: z.string(),
+						name: z.string(),
+						size: z.number(),
+						lastModified: z.string().nullable(),
+						url: z.string(),
+					}),
+				]),
 			},
 		},
 	};
@@ -34,7 +47,8 @@ export class GetObject extends OpenAPIRoute {
 			});
 		}
 
-		let filePath;
+		// Decode base64 key
+		let filePath: string;
 		try {
 			filePath = decodeURIComponent(escape(atob(data.params.key)));
 		} catch (e) {
@@ -43,12 +57,27 @@ export class GetObject extends OpenAPIRoute {
 			);
 		}
 
+		// Fetch object
 		const object = await bucket.get(filePath);
 
-		if (object === null) {
+		if (!object) {
 			return Response.json({ msg: "Object Not Found" }, { status: 404 });
 		}
 
+		// If frontend requested ?public=true, return JSON with URL
+		if (data.query.public) {
+			const publicUrl = `https://file.fosbat.art/${bucketName}/${filePath}`;
+			return Response.json({
+				bucket: bucketName,
+				key: filePath,
+				name: filePath.split("/").pop(),
+				size: object.size,
+				lastModified: object.httpMetadata?.lastModified?.toISOString() ?? null,
+				url: publicUrl,
+			});
+		}
+
+		// Default: return file for download
 		const headers = new Headers();
 		object.writeHttpMetadata(headers);
 		headers.set("etag", object.httpEtag);
@@ -57,8 +86,6 @@ export class GetObject extends OpenAPIRoute {
 			`attachment; filename="${filePath.split("/").pop()}"`,
 		);
 
-		return new Response(object.body, {
-			headers,
-		});
+		return new Response(object.body, { headers });
 	}
 }

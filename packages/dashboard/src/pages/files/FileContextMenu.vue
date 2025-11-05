@@ -45,45 +45,24 @@ export default {
     deleteObject() { this.$emit("deleteObject", this.prop.row); },
     renameObject() { this.$emit("renameObject", this.prop.row); },
     updateMetadataObject() { this.$emit("updateMetadataObject", this.prop.row); },
-
-    shareObject: async function () {
+    
+    async shareObject() {
       try {
-        const baseUrl = "https://file.fosbat.art";
+        // Fetch public URL from the worker
+        const bucket = this.$route.params.bucket;
+        const key = encode(this.prop.row.key);
+        const res = await fetch(`${this.mainStore.serverUrl}/api/buckets/${bucket}/${key}?public=true`);
+        const data = await res.json();
 
-        // Split the R2 object key into segments
-        const segments = this.prop.row.key.split("/");
-
-        // Decode each segment individually if it's Base64
-        const decodedSegments = segments.map(seg => {
-          try {
-            const decoded = atob(seg);
-            // Only return if it looks like a valid filename
-            if (/^[\w\s\-./]+$/.test(decoded)) {
-              return decoded;
-            }
-            return seg;
-          } catch {
-            return seg; // not Base64
-          }
-        });
-
-        // Join segments to form a proper path
-        const path = decodedSegments.join("/");
-
-        const url = `${baseUrl}/${path}`;
-
-        await navigator.clipboard.writeText(url);
-        this.q.notify({
-          message: "Public R2 link copied to clipboard!",
-          timeout: 5000,
-          type: "positive",
-        });
+        if (data.url) {
+          await navigator.clipboard.writeText(data.url);
+          this.q.notify({ message: "Sharable link copied to clipboard!", color: "green" });
+        } else {
+          throw new Error("No URL returned");
+        }
       } catch (err) {
-        this.q.notify({
-          message: `Failed to copy: ${err}`,
-          timeout: 5000,
-          type: "negative",
-        });
+        console.error(err);
+        this.q.notify({ message: "Failed to get sharable link", color: "negative" });
       }
     },
 
@@ -98,5 +77,3 @@ export default {
   }
 };
 </script>
-
-
