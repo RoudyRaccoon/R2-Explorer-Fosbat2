@@ -62,20 +62,11 @@ export default {
       document.body.removeChild(link);
     },
     shareObject() {
-  // Construct the public URL directly
-  const bucketName = this.$route.params.bucket;
-  const fileKey = encode(this.prop.row.key); // base64 encoded
-  const url = `${this.mainStore.serverUrl}/r2/${bucketName}/${fileKey}`;
-
-  // Copy to clipboard
-  navigator.clipboard.writeText(url)
-    .then(() => {
-      this.q.notify({ message: "Sharable link copied!", color: "green" });
-    })
-    .catch(() => {
-      this.q.notify({ message: "Failed to copy link", color: "negative" });
-    });
+  const directUrl = `${this.mainStore.r2PublicBaseUrl}/${encode(this.prop.row.key)}`;
+  navigator.clipboard.writeText(directUrl);
+  this.q.notify({ message: "Sharable link copied!", color: "green" });
 }
+
 
   }
 };
