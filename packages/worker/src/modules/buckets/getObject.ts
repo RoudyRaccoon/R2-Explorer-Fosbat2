@@ -14,15 +14,15 @@ export class GetObject extends OpenAPIRoute {
         key: z.string().describe("base64 encoded file key"),
       }),
       query: z.object({
-        public: z.string().optional(), // optional query param to request public link
+        public: z.string().optional(), // new query param for sharable link
       }),
     },
     responses: {
       "200": {
-        description: "File binary or public URL",
+        description: "File binary or JSON with sharable link",
         schema: z.union([
           z.string().openapi({ format: "binary" }),
-          z.object({ url: z.string().url() }),
+          z.object({ url: z.string() }),
         ]),
       },
     },
@@ -40,7 +40,7 @@ export class GetObject extends OpenAPIRoute {
       });
     }
 
-    let filePath: string;
+    let filePath;
     try {
       filePath = decodeURIComponent(escape(atob(data.params.key)));
     } catch (e) {
@@ -49,29 +49,30 @@ export class GetObject extends OpenAPIRoute {
       );
     }
 
-    // --- Handle public URL request ---
-    if (data.query.public === "true") {
-      // Replace with your public domain for shared links
-      const publicDomain = c.env.PUBLIC_DOMAIN || c.req.headers.get("host")!;
-      const publicUrl = `https://${publicDomain}/files/${bucketName}/${encodeURIComponent(data.params.key)}`;
-      return Response.json({ url: publicUrl });
-    }
-
-    // --- Regular file download ---
     const object = await bucket.get(filePath);
 
-    if (object === null) {
+    if (!object) {
       return Response.json({ msg: "Object Not Found" }, { status: 404 });
     }
 
+    // Handle public sharable link
+    if (data.query.public === "true") {
+      // Construct the URL to this worker endpoint
+      const url = `${c.env.PUBLIC_WORKER_URL}/files/${btoa(filePath)}`;
+      return Response.json({ url }, { status: 200 });
+    }
+
+    // Normal download response
     const headers = new Headers();
     object.writeHttpMetadata(headers);
     headers.set("etag", object.httpEtag);
     headers.set(
       "Content-Disposition",
-      `attachment; filename="${filePath.split("/").pop()}"`
+      `attachment; filename="${filePath.split("/").pop()}"`,
     );
 
-    return new Response(object.body, { headers });
+    return new Response(object.body, {
+      headers,
+    });
   }
 }
