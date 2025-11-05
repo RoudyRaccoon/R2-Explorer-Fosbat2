@@ -62,16 +62,21 @@ export default {
       document.body.removeChild(link);
     },
     shareObject() {
-      fetch(`${this.mainStore.serverUrl}/api/buckets/${this.$route.params.bucket}/${encode(this.prop.row.key)}?public=true`)
-        .then(res => res.json())
-        .then(data => {
-          navigator.clipboard.writeText(data.url);
-          this.q.notify({ message: "Sharable link copied!", color: "green" });
-        })
-        .catch(() => {
-          this.q.notify({ message: "Failed to copy link", color: "negative" });
-        });
-    }
+  // Construct the public URL directly
+  const bucketName = this.$route.params.bucket;
+  const fileKey = encode(this.prop.row.key); // base64 encoded
+  const url = `${this.mainStore.serverUrl}/r2/${bucketName}/${fileKey}`;
+
+  // Copy to clipboard
+  navigator.clipboard.writeText(url)
+    .then(() => {
+      this.q.notify({ message: "Sharable link copied!", color: "green" });
+    })
+    .catch(() => {
+      this.q.notify({ message: "Failed to copy link", color: "negative" });
+    });
+}
+
   }
 };
 </script>
