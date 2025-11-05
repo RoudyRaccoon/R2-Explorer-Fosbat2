@@ -28,7 +28,7 @@
 
 <script>
 import { useQuasar } from "quasar";
-import { ROOT_FOLDER, decode, encode } from "src/appUtils";
+import { decode, encode } from "src/appUtils";
 import { useMainStore } from "stores/main-store";
 
 export default {
@@ -41,11 +41,55 @@ export default {
     };
   },
   methods: {
-    openObject() { this.$emit("openObject", this.prop.row); },
-    deleteObject() { this.$emit("deleteObject", this.prop.row); },
-    renameObject() { this.$emit("renameObject", this.prop.row); },
-    updateMetadataObject() { this.$emit("updateMetadataObject", this.prop.row); },
-    shareObject() { this.$emit("shareObject", this.prop.row); },
+    openObject() {
+      this.$emit("openObject", this.prop.row);
+    },
+    deleteObject() {
+      this.$emit("deleteObject", this.prop.row);
+    },
+    renameObject() {
+      this.$emit("renameObject", this.prop.row);
+    },
+    updateMetadataObject() {
+      this.$emit("updateMetadataObject", this.prop.row);
+    },
+    shareObject: async function () {
+      try {
+        // Public R2 domain
+        const baseUrl = "https://file.fosbat.art";
+
+        let path = this.prop.row.key;
+
+        // Decode Base64 if needed
+        try {
+          const decoded = atob(path);
+          if (/^[\w\s\-./]+$/.test(decoded)) {
+            path = decoded;
+          }
+        } catch {
+          // Not Base64, leave as-is
+        }
+
+        // Normalize folder paths
+        path = path.replace(/\\/g, "/").replace(/^\/+/, "");
+
+        // Construct sharable URL
+        const url = `${baseUrl}/${path}`;
+
+        await navigator.clipboard.writeText(url);
+        this.q.notify({
+          message: "Public R2 link copied to clipboard!",
+          timeout: 5000,
+          type: "positive",
+        });
+      } catch (err) {
+        this.q.notify({
+          message: `Failed to copy: ${err}`,
+          timeout: 5000,
+          type: "negative",
+        });
+      }
+    },
     downloadObject() {
       const link = document.createElement("a");
       link.download = this.prop.row.name;
@@ -57,3 +101,4 @@ export default {
   }
 };
 </script>
+
