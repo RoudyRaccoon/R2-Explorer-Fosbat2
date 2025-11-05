@@ -1,5 +1,5 @@
 <template>
-  <q-list style="min-width: 100px">
+  <q-list style="min-width: 150px">
     <q-item clickable v-close-popup @click="openObject">
       <q-item-section>Open</q-item-section>
     </q-item>
@@ -41,31 +41,18 @@ export default {
     };
   },
   methods: {
-    openObject() { this.$emit("openObject", this.prop.row); },
-    deleteObject() { this.$emit("deleteObject", this.prop.row); },
-    renameObject() { this.$emit("renameObject", this.prop.row); },
-    updateMetadataObject() { this.$emit("updateMetadataObject", this.prop.row); },
-    
-    async shareObject() {
-      try {
-        // Fetch public URL from the worker
-        const bucket = this.$route.params.bucket;
-        const key = encode(this.prop.row.key);
-        const res = await fetch(`${this.mainStore.serverUrl}/api/buckets/${bucket}/${key}?public=true`);
-        const data = await res.json();
-
-        if (data.url) {
-          await navigator.clipboard.writeText(data.url);
-          this.q.notify({ message: "Sharable link copied to clipboard!", color: "green" });
-        } else {
-          throw new Error("No URL returned");
-        }
-      } catch (err) {
-        console.error(err);
-        this.q.notify({ message: "Failed to get sharable link", color: "negative" });
-      }
+    openObject() {
+      this.$emit("openObject", this.prop.row);
     },
-
+    deleteObject() {
+      this.$emit("deleteObject", this.prop.row);
+    },
+    renameObject() {
+      this.$emit("renameObject", this.prop.row);
+    },
+    updateMetadataObject() {
+      this.$emit("updateMetadataObject", this.prop.row);
+    },
     downloadObject() {
       const link = document.createElement("a");
       link.download = this.prop.row.name;
@@ -73,7 +60,19 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+    shareObject() {
+      fetch(`${this.mainStore.serverUrl}/api/buckets/${this.$route.params.bucket}/${encode(this.prop.row.key)}?public=true`)
+        .then(res => res.json())
+        .then(data => {
+          navigator.clipboard.writeText(data.url);
+          this.q.notify({ message: "Sharable link copied!", color: "green" });
+        })
+        .catch(() => {
+          this.q.notify({ message: "Failed to copy link", color: "negative" });
+        });
     }
   }
 };
 </script>
+
