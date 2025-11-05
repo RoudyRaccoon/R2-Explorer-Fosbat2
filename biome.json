@@ -9,10 +9,18 @@
     "ignoreUnknown": false,
     "ignore": [],
     "include": [
-      "packages/**/*.{js,ts,vue}",
-      "template/**/*.{js,ts,vue}",
-      "packages/dashboard/src/**/*.{js,ts,vue}",
-      "packages/worker/src/**/*.{js,ts,vue}"
+      "packages/**/*.js",
+      "packages/**/*.ts",
+      "packages/**/*.vue",
+      "template/**/*.js",
+      "template/**/*.ts",
+      "template/**/*.vue",
+      "packages/dashboard/src/**/*.js",
+      "packages/dashboard/src/**/*.ts",
+      "packages/dashboard/src/**/*.vue",
+      "packages/worker/src/**/*.js",
+      "packages/worker/src/**/*.ts",
+      "packages/worker/src/**/*.vue"
     ]
   },
   "formatter": {
