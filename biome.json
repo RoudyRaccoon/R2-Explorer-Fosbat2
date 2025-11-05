@@ -11,12 +11,7 @@
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space",        // Change from "tab" to 2-space indentation for Vue/JS consistency
-    "indentSize": 2,
-    "quoteStyle": "single",        // Use single quotes for JS/Vue
-    "semi": true,
-    "maxLineLength": 120,
-    "trailingComma": "none"
+    "indentStyle": "space"
   },
   "organizeImports": {
     "enabled": true
@@ -48,14 +43,14 @@
       "quoteStyle": "single"
     }
   },
-  "vue": {
-    "formatter": {
-      "enabled": true,
-      "indentStyle": "space",
-      "indentSize": 2,
-      "quoteStyle": "single",
-      "semi": true,
-      "maxLineLength": 120
+  "overrides": [
+    {
+      "files": ["*.vue"],
+      "formatter": {
+        "enabled": true,
+        "indentStyle": "space"
+      }
     }
-  }
+  ]
 }
+
