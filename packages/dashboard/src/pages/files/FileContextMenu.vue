@@ -58,47 +58,31 @@ export default {
 			this.$emit("deleteObject", this.prop.row);
 		},
 		shareObject: async function () {
-			let url;
-			if (this.prop.row.type === "folder") {
-				url =
-					window.location.origin +
-					this.$router.resolve({
-						name: "files-folder",
-						params: {
-							bucket: this.selectedBucket,
-							folder: encode(this.prop.row.key),
-						},
-					}).href;
-			} else {
-				url =
-					window.location.origin +
-					this.$router.resolve({
-						name: "files-file",
-						params: {
-							bucket: this.selectedBucket,
-							folder: this.selectedFolder
-								? encode(this.selectedFolder)
-								: ROOT_FOLDER,
-							file: this.prop.row.nameHash,
-						},
-					}).href;
-			}
+  try {
+    // Build the clean public R2 link
+    // Adjust `https://file.fosbat.art` to your custom domain
+    const baseUrl = "https://file.fosbat.art";
 
-			try {
-				await navigator.clipboard.writeText(url);
-				this.q.notify({
-					message: "Link to file copied to clipboard!",
-					timeout: 5000,
-					type: "positive",
-				});
-			} catch (err) {
-				this.q.notify({
-					message: `Failed to copy: ${err}`,
-					timeout: 5000,
-					type: "negative",
-				});
-			}
-		},
+    // Combine folder + file path
+    const path = this.prop.row.key; // R2 object key includes folders
+
+    // Full public URL
+    const url = `${baseUrl}/${path}`;
+
+    await navigator.clipboard.writeText(url);
+    this.q.notify({
+      message: "Public R2 link copied to clipboard!",
+      timeout: 5000,
+      type: "positive",
+    });
+  } catch (err) {
+    this.q.notify({
+      message: `Failed to copy: ${err}`,
+      timeout: 5000,
+      type: "negative",
+    });
+  }
+},
 		downloadObject: function () {
 			const link = document.createElement("a");
 			link.download = this.prop.row.name;
