@@ -1,4 +1,4 @@
-name: Deploy
+name: Build and Deploy
 
 on:
   workflow_dispatch:
@@ -30,21 +30,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # 5. Build the Quasar SPA
+      # 5. Build Quasar SPA
       - name: Build SPA
-        run: pnpm build  # assumes Quasar is configured correctly in package.json
+        run: pnpm build  # make sure this outputs to dist/spa
 
-      # 6. Deploy SPA to GitHub Pages
-      - name: Deploy SPA to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/spa  # adjust if Quasar outputs to a different folder
-          user_name: 'github-actions'
-          user_email: 'github-actions@github.com'
-
-      # 7. Prepare Worker deployment
-      - name: Setup R2-Explorer Worker
+      # 6. Prepare Worker (copies SPA build)
+      - name: Prepare Worker
         env:
           R2EXPLORER_WORKER_NAME: ${{ vars.R2EXPLORER_WORKER_NAME }}
           R2EXPLORER_CONFIG: ${{ vars.R2EXPLORER_CONFIG }}
@@ -52,6 +43,15 @@ jobs:
           R2EXPLORER_DOMAIN: ${{ vars.R2EXPLORER_DOMAIN }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: node packages/github-action/prepareDeploy.js
+
+      # 7. Deploy SPA to GitHub Pages
+      - name: Deploy SPA to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/spa
+          user_name: 'github-actions'
+          user_email: 'github-actions@github.com'
 
       # 8. Install Worker dependencies
       - name: Install Worker dependencies
