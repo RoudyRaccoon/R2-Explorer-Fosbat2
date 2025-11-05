@@ -5,10 +5,12 @@
     "clientKind": "git",
     "useIgnoreFile": false
   },
-  "files": {
-    "ignoreUnknown": false,
-    "ignore": []
-  },
+  "include": [
+    "packages/**/*.{js,ts,vue}",
+    "template/**/*.{js,ts,vue}",
+    "packages/dashboard/src/**/*.{js,ts,vue}",
+    "packages/worker/src/**/*.{js,ts,vue}"
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space"
@@ -43,14 +45,14 @@
       "quoteStyle": "single"
     }
   },
-  "overrides": [
-    {
-      "files": ["*.vue"],
-      "formatter": {
-        "enabled": true,
-        "indentStyle": "space"
-      }
+  "json": {
+    "formatter": {
+      "quoteStyle": "double"
     }
-  ]
+  },
+  "css": {
+    "formatter": {
+      "indentStyle": "space"
+    }
+  }
 }
-
